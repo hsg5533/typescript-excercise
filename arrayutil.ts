@@ -270,3 +270,63 @@ function sortByOrder<T extends { [key: string]: any }>(
     (a, b) => order.indexOf(a[key] as string) - order.indexOf(b[key] as string)
   );
 }
+
+function updateStatus<T extends string, U extends string>(
+  items: string[],
+  activeItems: Array<{ [K in T]: string } & { [S in U]: boolean }>,
+  key: T,
+  statusKey: U
+): Array<{ [K in T]: string } & { [S in U]: boolean }> {
+  // activeItems에서 key에 해당하는 값들을 추출하여 string[] 타입으로 설정
+  const activeItemValues: string[] = activeItems.map((item) => item[key]);
+  const result: Array<{ [K in T]: string } & { [S in U]: boolean }> = [
+    ...activeItems,
+  ];
+  items.forEach((item) => {
+    // item이 activeItemValues에 포함되어 있지 않다면 새로운 객체를 추가
+    if (!activeItemValues.includes(item)) {
+      // result에 새로운 객체를 추가할 때, 타입을 명시적으로 지정
+      result.push({ [key]: item, [statusKey]: false } as {
+        [K in T]: string;
+      } & { [S in U]: boolean });
+    }
+  });
+  return result;
+}
+
+// 사용 예제
+const areas = [
+  "서울",
+  "경기도",
+  "인천",
+  "세종",
+  "대전",
+  "충북",
+  "충남",
+  "전북",
+  "전남",
+  "광주",
+  "강원",
+  "경북",
+  "경남",
+  "대구",
+  "울산",
+  "부산",
+  "제주",
+];
+
+const activeRegions = [
+  { region: "경기도", regionStatus: true },
+  { region: "대구", regionStatus: true },
+  { region: "광주", regionStatus: true },
+];
+
+// areas 예제 호출
+const updatedRegions = updateStatus(
+  areas,
+  activeRegions,
+  "region",
+  "regionStatus"
+);
+
+console.log(updatedRegions);
