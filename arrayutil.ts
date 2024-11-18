@@ -271,6 +271,51 @@ function sortByOrder<T extends { [key: string]: any }>(
   );
 }
 
+/**
+ * 주어진 `items` 배열을 기준으로 `activeItems` 배열의 상태를 업데이트합니다.
+ * `items`에 존재하지만 `activeItems`에 없는 항목은 새로운 객체로 추가되고,
+ * 해당 항목의 상태는 `false`로 설정됩니다.
+ *
+ * @template T - `activeItems` 객체의 문자열 속성 키 타입.
+ * @template U - `activeItems` 객체의 상태를 나타내는 불리언 속성 키 타입.
+ * @param {string[]} items - 비교 대상이 되는 문자열 배열.
+ * @param {Array<{ [K in T]: string } & { [S in U]: boolean }>} activeItems -
+ *        활성화된 항목들의 배열로, 문자열 키와 불리언 상태를 포함합니다.
+ * @param {T} key - `activeItems`에서 값을 비교할 문자열 속성 키.
+ * @param {U} statusKey - `activeItems`에서 상태를 나타낼 불리언 속성 키.
+ * @returns {Array<{ [K in T]: string } & { [S in U]: boolean }>}
+ *          업데이트된 객체 배열로, 누락된 항목은 추가되며 상태는 `false`로 설정됩니다.
+ *
+ * @example
+ * // 예제 1: 기본 사용
+ * const items = ["apple", "banana", "cherry"];
+ * const activeItems = [
+ *   { name: "apple", isActive: true },
+ *   { name: "banana", isActive: true },
+ * ];
+ * const result = updateStatus(items, activeItems, "name", "isActive");
+ * console.log(result);
+ * // 출력:
+ * // [
+ * //   { name: "apple", isActive: true },
+ * //   { name: "banana", isActive: true },
+ * //   { name: "cherry", isActive: false },
+ * // ]
+ *
+ * @example
+ * // 예제 2: 다른 키 사용
+ * const items = ["dog", "cat"];
+ * const activeItems = [
+ *   { type: "dog", selected: true },
+ * ];
+ * const result = updateStatus(items, activeItems, "type", "selected");
+ * console.log(result);
+ * // 출력:
+ * // [
+ * //   { type: "dog", selected: true },
+ * //   { type: "cat", selected: false },
+ * // ]
+ */
 function updateStatus<T extends string, U extends string>(
   items: string[],
   activeItems: Array<{ [K in T]: string } & { [S in U]: boolean }>,
