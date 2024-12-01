@@ -116,7 +116,8 @@ async function requestMini(
       },
       body: method === "GET" ? null : JSON.stringify(params),
     });
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (err) {
     if (err instanceof Error) {
       throw new Error("Exception during API fetch process...");
@@ -170,7 +171,8 @@ async function request(
     if (cookies.length > 0) {
       csrftoken = getCsrftoken(cookies);
     }
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (err) {
     if (err instanceof Error) {
       throw new Error("Exception during API fetch process...");
@@ -228,6 +230,11 @@ async function requestPlus(
     const duration = new Date().getTime() - start;
     const contentType = response.headers.get("Content-Type") || "";
     const cookies = response.headers.getSetCookie();
+    const data = contentType.includes("application/json")
+      ? await response.json()
+      : contentType.includes("text/html")
+      ? await response.text()
+      : response;
     if (cookies.length > 0) {
       csrftoken = getCsrftoken(cookies);
     }
@@ -235,13 +242,7 @@ async function requestPlus(
       log("debug", "so fast response please awaiting...");
       await new Promise((resolve) => setTimeout(resolve, delay - duration));
     }
-    if (contentType.includes("application/json")) {
-      return await response.json();
-    }
-    if (contentType.includes("text/html")) {
-      return await response.text();
-    }
-    return response;
+    return data;
   } catch (err) {
     if (err instanceof Error) {
       log("error", "An error occurred while fetching data...");
@@ -324,15 +325,15 @@ async function requestPro(
       const durationSec = Math.floor((duration / 1000) * 100) / 100;
       const contentType = response.headers.get("Content-Type") || "";
       const cookies = response.headers.getSetCookie();
+      const data = contentType.includes("application/json")
+        ? await response.json()
+        : contentType.includes("text/html")
+        ? await response.text()
+        : response;
       if (cookies.length > 0) {
         csrftoken = getCsrftoken(cookies);
       }
-      if (contentType.includes("application/json")) {
-        log("debug", "Response data:", await response.json());
-      }
-      if (contentType.includes("text/html")) {
-        log("debug", "Response data:", await response.text());
-      }
+      log("debug", "Response data:", data);
       log("info", `Fetch completed in ${durationSec} seconds`);
       if (!infinity) {
         times.push(durationSec);
@@ -347,13 +348,7 @@ async function requestPro(
           Math.floor((times.reduce((a, b) => a + b, 0) / times.length) * 100) /
           100;
         log("info", `Average fetch time: ${average} seconds`);
-        if (contentType.includes("application/json")) {
-          return { time: average, data: await response.json() };
-        }
-        if (contentType.includes("text/html")) {
-          return { time: average, data: await response.text() };
-        }
-        return { time: average, data: response };
+        return { time: average, data: data };
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -490,15 +485,15 @@ class RequestMax {
         const durationSec = Math.floor((duration / 1000) * 100) / 100;
         const contentType = response.headers.get("Content-Type") || "";
         const cookies = response.headers.getSetCookie();
+        const data = contentType.includes("application/json")
+          ? await response.json()
+          : contentType.includes("text/html")
+          ? await response.text()
+          : response;
         if (cookies.length > 0) {
           csrftoken = getCsrftoken(cookies);
         }
-        if (contentType.includes("application/json")) {
-          log("debug", "Response data:", await response.json());
-        }
-        if (contentType.includes("text/html")) {
-          log("debug", "Response data:", await response.text());
-        }
+        log("debug", "Response data:", data);
         log("info", `Fetch completed in ${durationSec} seconds`);
         if (!infinity) {
           times.push(durationSec);
@@ -514,13 +509,7 @@ class RequestMax {
               (times.reduce((a, b) => a + b, 0) / times.length) * 100
             ) / 100;
           log("info", `Average fetch time: ${average} seconds`);
-          if (contentType.includes("application/json")) {
-            return { time: average, data: await response.json() };
-          }
-          if (contentType.includes("text/html")) {
-            return { time: average, data: await response.text() };
-          }
-          return { time: average, data: response };
+          return { time: average, data: data };
         }
       } catch (err) {
         if (err instanceof Error) {
